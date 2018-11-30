@@ -24,6 +24,6 @@ y = [];
 t = [];
 visStim = [];
 bufferNo = 0;
-startForeground(s);
+startBackground(s);
 end
 

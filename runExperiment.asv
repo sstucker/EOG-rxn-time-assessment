@@ -26,9 +26,9 @@ A3onset = randi([3,6]);
 V1onset = randi([3,6]);
 V2onset = randi([3,6]);
 V3onset = randi([3,6]);
-B1onset = randi([3,6]);
-B2onset = randi([3,6]);
-B3onset = randi([3,6]);
+AV1onset = randi([3,6]);
+AV2onset = randi([3,6]);
+AV3onset = randi([3,6]);
 polchoices = ['R','L'];
 A1polarity = polchoices(randi([1,2]));
 A2polarity = polchoices(randi([1,2]));
@@ -36,9 +36,9 @@ A3polarity = polchoices(randi([1,2]));
 V1polarity = polchoices(randi([1,2]));
 V2polarity = polchoices(randi([1,2]));
 V3polarity = polchoices(randi([1,2]));
-B1polarity = polchoices(randi([1,2]));
-B2polarity = polchoices(randi([1,2]));
-B3polarity = polchoices(randi([1,2]));
+AV1polarity = polchoices(randi([1,2]));
+AV2polarity = polchoices(randi([1,2]));
+AV3polarity = polchoices(randi([1,2]));
 trials = [...
 {'A',stimulusGenerator(trialDuration,auralStimDuration,sampleRate,A1onset,A1polarity),A1onset,A1polarity};...         %AURAL 1 [type,stim,onset,polarity}
 {'A',stimulusGenerator(trialDuration,auralStimDuration,sampleRate,A2onset,A2polarity),A2onset,A2polarity};...         %AURAL 2
@@ -46,43 +46,46 @@ trials = [...
 {'V',nullStim,V1onset,V1polarity};...                                                                                 %VISUAL 1
 {'V',nullStim,V2onset,V2polarity};...                                                                                 %VISUAL 2
 {'V',nullStim,V3onset,V3polarity};...                                                                                 %VISUAL 3
-{'B',stimulusGenerator(trialDuration,auralStimDuration,sampleRate,B1onset,B1polarity),B1onset,B1polarity};...    %AURAL-VISUAL 1
-{'B',stimulusGenerator(trialDuration,auralStimDuration,sampleRate,B2onset,B2polarity),B2onset,B2polarity};...    %AURAL-VISUAL 2
-{'B',stimulusGenerator(trialDuration,auralStimDuration,sampleRate,B3onset,B3polarity),B3onset,B3polarity}...     %AURAL-VISUAL 3
+{'AV',stimulusGenerator(trialDuration,auralStimDuration,sampleRate,AV1onset,AV1polarity),AV1onset,AV1polarity};...    %AURAL-VISUAL 1
+{'AV',stimulusGenerator(trialDuration,auralStimDuration,sampleRate,AV2onset,AV2polarity),AV2onset,AV2polarity};...    %AURAL-VISUAL 2
+{'AV',stimulusGenerator(trialDuration,auralStimDuration,sampleRate,AV3onset,AV3polarity),AV3onset,AV3polarity}...     %AURAL-VISUAL 3
 ];
-experimentScreen = visualCue;
 %[type,aural_stim,time,EOGvoltage,visual_stim]
 BigData = cell(9,5);
-experimentScreen.init
-pause(3)
-for i = (1:9)
+for i = (4:9)
     trial = trials(i,:);
     if trial{1} == 'A'
         fprintf('RUNNING AN A TRIAL :) ')
-        experimentScreen.hideInstructions
         stimsig = trial{2};
-        BigData{i,1} = trial(1);
-        BigData{i,2} = stimsig; 
-        [trialt,trialy,trial_Vstim] = runTrial(inputChannel,outputChannelL,outputChannelR,trialDuration,sampleRate,AListener,stimsig);
-        BigData(i,3:5)= {trialt,trialy,trial_Vstim} 
-        experimentScreen.showInstructions
-    elseif trial{1} == 'V' || trial{1} == 'B'
-        fprintf('RUNNING AN B TRIAL :) ')
-        experimentScreen.hideInstructions
+        BigData(i,1) = trial{1};
+        BigData(i,2) = stimsig; 
+        BigData(i,3:5) = {runTrial(inputChannel,outputChannelL,outputChannelR,trialDuration,sampleRate,AListener,stimsig)};
+    elseif trial{1} == 'V' || trial{1} == 'AV'
+        fprintf('RUNNING AN AV TRIAL :) ')
         stimsig = trial{2};
         visualPolarity = trials{i,4};
         bufferCue = trials{i,3};
-        BigData{i,1} = trial(1);
-        BigData{i,2} = stimsig;
-        [trialt,trialy,trial_Vstim] = runTrial(inputChannel,outputChannelL,outputChannelR,trialDuration,sampleRate,AVListener,stimsig);
-        BigData(i,3:5)= {trialt,trialy,trial_Vstim} 
-        experimentScreen.hideCue
-        experimentScreen.centerCue
-        experimentScreen.showInstructions
+        BigData(i,1) = trial{1};
+        BigData(i,2) = stimsig;
+        BigData(i,1:3) = {runTrial(inputChannel,outputChannelL,outputChannelR,trialDuration,sampleRate,AVListener,stimsig)};
     else
         fprintf('Invalid type argument in trials array!');
     end
 end
+%--------------------------------------------------------------------------
+% 
+% experimentScreen = visualCue;
+% experimentScreen.init;
+% pause(2);
+% experimentScreen.hideInstructions;
+% [myT,myY,myVisStim] = runTrial('ai0','ao1','ao0',trialDuration,sampleRate,AVListener,stim);
+
+% plot(myT,myY);
+% hold on
+% plot(myT,stim(:,1));
+% plot(myT,stim(:,2));
+
+%listeners down here!
 %--------------------------------------------------------------------------
 
 function AuralListener(src,event)
@@ -100,7 +103,7 @@ global bufferNo;
 global bufferCue;
 global visualPolarity;
 VBuffer = zeros(size(event.TimeStamps));
-if bufferNo == 60
+if bufferNo == bufferCue
     if visualPolarity == 'L'
         experimentScreen.leftCue;
     elseif visualPolarity == 'R'

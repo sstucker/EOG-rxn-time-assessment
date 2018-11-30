@@ -5,11 +5,14 @@ function stimulus = stimulusGenerator(trialDuration,stimDuration,Fs,onset,polari
     %author: sstucker 11/28/18
     neg45 = matfile('Subject_003_-45_0.mat');
     pos45 = matfile('Subject_003_45_0.mat');
+    %----------------------------------------------------------------------
+    volume = 0.1; %adjust this so as to not deafen subject!
+    %----------------------------------------------------------------------
     %defines stimulus as an array of length time*samplerate with white
     %noise burst in the specified location. Putting it too close to the end
     %of the trialDuration will result in index error
     stimulus = [0:trialDuration*Fs]*0;
-    stimulus(onset*Fs:onset*Fs+stimDuration*Fs) = randn(size(stimulus(onset*Fs:onset*Fs+stimDuration*Fs)));
+    stimulus(onset*Fs:onset*Fs+stimDuration*Fs) = 0.1*randn(size(stimulus(onset*Fs:onset*Fs+stimDuration*Fs)));
     %Looks at polarity input and convolves using loaded HRTFs accordingly.
     if polarity == 'L'
         stimL = conv(stimulus,pos45.hrir_left);

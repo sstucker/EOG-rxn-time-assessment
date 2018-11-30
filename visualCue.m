@@ -4,16 +4,17 @@ classdef visualCue < handle
     %init
     %hideInstructions
     %showInstructions
+    %hideCue
     %centerCue,leftCue,rightCue
     %WindowAPIdebug <-- hacker use only
-    %author: sstucker 11/29/18
+    %author: sstucker ctaglietti 11/29/18
     properties
         screen;
         centercue;
         leftcue;
         rightcue;
         instructions;
-        distance = 400;
+        distance = 700;
         %resolution of display
         xsize = 1920;
         ysize = 1080;
@@ -61,14 +62,15 @@ classdef visualCue < handle
         function showInstructions(obj)
            set(obj.instructions,'Visible','on')
         end
-        function leftCue(obj)
+        function hideCue(obj)
            set(obj.rightcue,'Visible','off') 
            set(obj.centercue,'Visible','off')
+           set(obj.leftcue,'Visible','off')
+        end
+        function leftCue(obj)
            set(obj.leftcue,'Visible','on')
         end
         function rightCue(obj)
-           set(obj.leftcue,'Visible','off')       
-           set(obj.centercue,'Visible','off')
            set(obj.rightcue,'Visible','on')
         end
         function centerCue(obj)
